@@ -1,5 +1,5 @@
 # ArchiveAI.AI-Powered-Media-Archive-Search-System
-Sure — here is a **README.md** suitable for your project repository, aligned with the PRD and System Design we created for Sprint 2.
+
 
 # AI-Powered Historical Media Research Assistant
 
