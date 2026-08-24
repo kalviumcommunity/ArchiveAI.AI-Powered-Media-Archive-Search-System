@@ -1,0 +1,111 @@
+Project Plan – ArchiveAI 
+
+Week 1 – Project Setup & Core Development
+
+Weekly Goal: Set up the project architecture, database, authentication, and frontend foundation so the team can begin implementing the main features.
+
+Week 1 Progress Tracking: By the end of this week, the project should have a working development environment, database schema, login system, UI layout, and basic search integration.
+
+Day 1 Tasks
+
+Rahul: Set up the Python backend project, initialize GitHub repository, and configure PostgreSQL database connection (Backend)
+Sharon: Design the archive database schema and create tables for articles, interviews, and footage notes (Backend)
+Reshma: Create the React project, install Tailwind CSS, and set up the basic folder structure and routing (Frontend)
+
+Day 2 Tasks
+
+Rahul: Implement secure user authentication with login API and password hashing (Backend)
+Sharon: Create sample archive data and write database scripts to populate PostgreSQL (Backend)
+Reshma: Design and build the login page and application layout with navigation (Frontend)
+
+Day 3 Tasks
+
+Rahul: Develop database models and API endpoints for archive document retrieval (Backend)
+Sharon: Test database connectivity and optimize sample data organization (Backend)
+Reshma: Build the dashboard page and create the search interface design (Frontend)
+
+Day 4 Tasks
+
+Rahul: Create the archive search API to search documents using keywords (Backend)
+Sharon: Integrate backend APIs with the database and validate returned results (Backend)
+Reshma: Connect the search bar to the backend API and display search results (Frontend)
+
+Day 5 Tasks
+
+Rahul: Test authentication and search APIs and fix identified backend issues (Backend)
+Sharon: Verify database integrity and improve query performance for searching (Backend)
+Reshma: Improve the dashboard UI and ensure responsive layouts across devices (Frontend)
+
+Week 2 – Feature Development & AI Integration
+
+Weekly Goal: Complete the core search system, AI-powered search, source attribution, filtering, and search history.
+
+Week 2 Progress Tracking: By the end of this week, users should be able to search archives, filter results, view source information, and access saved search history.
+
+Day 6 Tasks
+
+Rahul: Integrate the OpenAI API with the backend search workflow (Backend)
+Sharon: Implement source attribution logic to return article title, author, date, and document ID (Backend)
+Reshma: Create the search results page with a clean and readable layout (Frontend)
+
+Day 7 Tasks
+
+Rahul: Improve AI search accuracy by preparing document context before API requests (Backend)
+Sharon: Develop APIs to support source attribution in search responses (Backend)
+Reshma: Display source attribution details below every search result (Frontend)
+
+Day 8 Tasks
+
+Rahul: Develop backend APIs for filtering archive results by content type (Backend)
+Sharon: Validate filtered search results and ensure correct document retrieval (Backend)
+Reshma: Build filter options for articles, interviews, and footage notes (Frontend)
+
+Day 9 Tasks
+
+Rahul: Create backend APIs to save and retrieve recent search history (Backend)
+Sharon: Store search history records in PostgreSQL and verify database consistency (Backend)
+Reshma: Develop the search history section and display previous searches (Frontend)
+
+Day 10 Tasks
+
+Rahul: Optimize backend search performance and improve API response time (Backend)
+Sharon: Test all backend features together and resolve integration issues (Backend)
+Reshma: Refine UI styling and improve the overall user experience (Frontend)
+
+Week 3 – Testing, Optimization & Deployment
+
+Weekly Goal: Test all features, fix bugs, optimize performance, prepare documentation, and deploy the application.
+
+Week 3 Progress Tracking: By the end of this week, ArchiveAI should be fully functional, tested, documented, and ready for presentation.
+
+Day 11 Tasks
+
+Rahul: Perform backend integration testing for authentication, search, and AI services (Backend)
+Sharon: Validate source attribution accuracy across all archive documents (Backend)
+Reshma: Test frontend pages and fix interface inconsistencies (Frontend)
+
+Day 12 Tasks
+
+Rahul: Improve backend error handling and API validation for invalid requests (Backend)
+Sharon: Optimize SQL queries and improve overall database performance (Backend)
+Reshma: Enhance responsiveness and accessibility of all frontend components (Frontend)
+
+Day 13 Tasks
+
+Rahul: Conduct API stress testing and resolve performance bottlenecks (Backend)
+Sharon: Verify search history and filtering functionality with different datasets (Backend)
+Reshma: Complete final frontend polishing and improve loading states (Frontend)
+
+Day 14 Tasks
+
+Rahul: Prepare backend deployment configuration and production environment settings (Backend)
+Sharon: Perform complete system testing and document all resolved issues (Backend)
+Reshma: Connect the production frontend with the deployed backend APIs (Frontend)
+
+Day 15 Tasks
+
+Rahul: Deploy the backend application and verify all API endpoints (Backend)
+Sharon: Perform final database backup and validate application reliability (Backend)
+Reshma: Deploy the frontend application, conduct final UI testing, and prepare the project demonstration (Frontend)  
+
+
