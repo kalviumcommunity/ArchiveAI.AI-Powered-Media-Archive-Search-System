@@ -1,4 +1,3 @@
-# ArchiveAI.AI-Powered-Media-Archive-Search-System
 
 
 # AI-Powered Historical Media Research Assistant
