@@ -14,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/signup" element={<AuthPage mode="signup" />} />
         <Route path="/signin" element={<AuthPage mode="signin" />} />
+        <Route path="/login" element={<Navigate to="/signin" replace />} />
         
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
@@ -24,7 +25,7 @@ function App() {
           <Route path="saved" element={<SavedPage />} />
         </Route>
         
-        <Route path="*" element={<Navigate to="/search" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
