@@ -50,6 +50,49 @@ def extract_snippet(text: str, query_words: List[str], max_len: int = 220) -> st
     return snippet
 
 
+def build_rag_context(documents: List[Document], max_chars: int = 4500) -> str:
+    """Build bounded, source-labelled evidence for the generation step."""
+    evidence = []
+    remaining_chars = max_chars
+
+    for doc in documents:
+        source_text = (doc.content or doc.summary or "").strip()
+        source_text = re.sub(r'\s+', ' ', source_text)
+        source_text = source_text[:1200]
+        block = (
+            f"[{doc.archive_id}]\n"
+            f"Title: {doc.title}\n"
+            f"Date: {doc.publication_date or 'Unknown'}\n"
+            f"Source: {doc.source or 'Archive Collection'}\n"
+            f"Summary: {doc.summary}\n"
+            f"Evidence: {source_text}\n"
+        )
+        if len(block) > remaining_chars:
+            break
+        evidence.append(block)
+        remaining_chars -= len(block)
+
+    return "\n".join(evidence)
+
+
+def parse_grounded_response(text: str, valid_archive_ids: set[str]) -> tuple[str, List[str]]:
+    """Accept only Gemini output that follows the grounded response contract."""
+    if "SUMMARY_TEXT" not in text or "KEY_POINTS" not in text:
+        return "", []
+
+    summary_part, points_part = text.split("KEY_POINTS", 1)
+    summary_text = summary_part.replace("SUMMARY_TEXT", "").strip()
+    key_points = []
+    for line in points_part.splitlines():
+        point = line.lstrip("- ").strip()
+        if point and any(f"[{archive_id}]" in point for archive_id in valid_archive_ids):
+            key_points.append(point)
+
+    if not summary_text or not key_points:
+        return "", []
+    return summary_text, key_points
+
+
 def generate_ai_summary_for_results(query: str, matched_docs: List[Document]) -> AISummary:
     if not matched_docs:
         return AISummary(
@@ -73,22 +116,24 @@ def generate_ai_summary_for_results(query: str, matched_docs: List[Document]) ->
     
     headline = f"Analysis of {len(matched_docs)} Archive Records on '{query}'"
     
-    # Prepare context for Gemini
-    context = ""
-    for doc in top_docs:
-        context += f"Document ID: {doc.archive_id}\nTitle: {doc.title}\nContent Snippet: {doc.summary}\n\n"
+    # Prepare bounded, source-labelled retrieval context for Gemini.
+    context = build_rag_context(top_docs)
+    valid_archive_ids = {doc.archive_id for doc in top_docs}
         
     prompt = f"""
-    Act as a media archive intelligence assistant.
-    You are given a user query and the top matching document snippets from an archive.
+    Act as a media archive intelligence assistant using only the supplied archive evidence.
+    Do not use outside knowledge, invent facts, or merge unsupported claims.
+    If the evidence is insufficient, say so explicitly in SUMMARY_TEXT.
     
     User Query: "{query}"
     
-    Top Documents:
+    Retrieved Evidence:
     {context}
     
     Write a concise summary paragraph (approx. 3-4 sentences) synthesizing how these documents relate to the user query.
-    Also, generate exactly 3 key bullet points summarizing the most important takeaways from these documents.
+    Also, generate up to 3 key bullet points summarizing the most important takeaways.
+    Every bullet must begin with the exact archive ID in square brackets, such as [ARCH-8821].
+    Only cite archive IDs present in the retrieved evidence.
     
     Respond STRICTLY in the following format:
     SUMMARY_TEXT
@@ -106,15 +151,13 @@ def generate_ai_summary_for_results(query: str, matched_docs: List[Document]) ->
         try:
             model = genai.GenerativeModel('gemini-1.5-pro')
             response = model.generate_content(prompt)
-            text = response.text
-            
-            if "SUMMARY_TEXT" in text and "KEY_POINTS" in text:
-                parts = text.split("KEY_POINTS")
-                summary_text = parts[0].replace("SUMMARY_TEXT", "").strip()
-                kp_text = parts[1].strip()
-                key_points = [line.lstrip("- ").strip() for line in kp_text.split("\n") if line.strip().startswith("-")]
-            else:
-                summary_text = text.strip()
+            generated_summary, generated_points = parse_grounded_response(
+                response.text,
+                valid_archive_ids
+            )
+            if generated_summary and generated_points:
+                summary_text = generated_summary
+                key_points = generated_points
         except Exception as e:
             print(f"Gemini API error: {e}")
             # Fallback if Gemini fails
