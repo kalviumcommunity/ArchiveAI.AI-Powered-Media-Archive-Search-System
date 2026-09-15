@@ -19,28 +19,46 @@ import {
   Search,
   CheckCircle,
   ExternalLink,
-  Shield
+  Shield,
+  Clock
 } from 'lucide-react'
+import { api } from '../api/client'
 
 const navItems = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/search', label: 'Media Archive', icon: Database },
+  { to: '/history', label: 'Search History', icon: Clock },
   { to: '/saved', label: 'Saved Items', icon: Bookmark },
   { to: '/settings', label: 'Settings', icon: Settings },
-]
-
-const initialRecentSearches = [
-  { id: '1', text: 'AI regulations interview', time: '2 hours ago' },
-  { id: '2', text: 'EU Renewable Energy Directive', time: 'Yesterday' },
-  { id: '3', text: 'Climate summit footage notes', time: '3 days ago' },
-  { id: '4', text: 'Election manifesto transcript', time: 'Last week' },
-  { id: '5', text: 'Tech earnings report Q3', time: 'Last week' },
 ]
 
 const mockNotifications = [
   { id: 1, title: 'New Archive Indexed', desc: 'EU Renewable Energy Directive 2023 was added.', time: '10m ago', unread: true },
   { id: 2, title: 'Search Cache Updated', desc: 'Semantic vectors refreshed for 450 documents.', time: '1h ago', unread: true },
   { id: 3, title: 'System Notice', desc: 'PostgreSQL database connected & ready.', time: '3h ago', unread: false },
+]
+
+function timeAgo(dateStr) {
+  if (!dateStr) return ''
+  const now = new Date()
+  const date = new Date(dateStr)
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString()
+}
+
+const fallbackRecentSearches = [
+  { id: '1', text: 'AI regulations interview', time: '2 hours ago' },
+  { id: '2', text: 'EU Renewable Energy Directive', time: 'Yesterday' },
+  { id: '3', text: 'Climate summit footage notes', time: '3 days ago' },
+  { id: '4', text: 'Election manifesto transcript', time: 'Last week' },
+  { id: '5', text: 'Tech earnings report Q3', time: 'Last week' },
 ]
 
 export default function Layout() {
@@ -50,7 +68,7 @@ export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false)
-  const [recentSearches, setRecentSearches] = useState(initialRecentSearches)
+  const [recentSearches, setRecentSearches] = useState([])
   const [user, setUser] = useState({
     name: 'Alex Morgan',
     email: 'journalist@archiveai.org',
@@ -66,12 +84,39 @@ export default function Layout() {
     const savedUser = localStorage.getItem('archiveai_user')
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser))
+        const parsed = JSON.parse(savedUser)
+        setUser({
+          name: parsed.full_name || parsed.name || 'User',
+          email: parsed.email || '',
+          role: parsed.role || 'Journalist',
+          avatarInitial: (parsed.full_name || parsed.name || 'U').charAt(0).toUpperCase()
+        })
       } catch {
         // use default
       }
     }
   }, [])
+
+  // Load real search history from API
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const items = await api.search.getHistory(5)
+        if (items && items.length > 0) {
+          setRecentSearches(items.map(item => ({
+            id: String(item.id),
+            text: item.query,
+            time: timeAgo(item.created_at),
+          })))
+        } else {
+          setRecentSearches(fallbackRecentSearches)
+        }
+      } catch {
+        setRecentSearches(fallbackRecentSearches)
+      }
+    }
+    loadHistory()
+  }, [location.pathname]) // re-fetch when navigating
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -93,12 +138,21 @@ export default function Layout() {
   }, [])
 
   const handleLogout = () => {
+    localStorage.removeItem('archiveai_token')
     localStorage.removeItem('archiveai_user')
     setUserDropdownOpen(false)
     navigate('/signin')
   }
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
+    // Delete each history item from the backend
+    for (const search of recentSearches) {
+      try {
+        await api.search.deleteHistory(Number(search.id))
+      } catch {
+        // ignore
+      }
+    }
     setRecentSearches([])
   }
 
@@ -120,6 +174,8 @@ export default function Layout() {
         return 'AI Summarizer'
       case '/source':
         return 'Source Verification'
+      case '/history':
+        return 'Search History'
       default:
         return 'Archive Workspace'
     }
@@ -267,7 +323,7 @@ export default function Layout() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span>PostgreSQL Archive</span>
+              <span>Archive Database</span>
             </div>
             <span className="font-mono text-emerald-400 text-[10px]">Connected</span>
           </div>

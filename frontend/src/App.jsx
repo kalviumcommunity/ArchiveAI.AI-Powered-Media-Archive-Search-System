@@ -7,6 +7,7 @@ import SummaryPage from './pages/SummaryPage'
 import SourcePage from './pages/SourcePage'
 import SettingsPage from './pages/SettingsPage'
 import SavedPage from './pages/SavedPage'
+import HistoryPage from './pages/HistoryPage'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="source" element={<SourcePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="saved" element={<SavedPage />} />
+          <Route path="history" element={<HistoryPage />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" replace />} />
